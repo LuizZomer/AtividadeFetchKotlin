@@ -1,5 +1,6 @@
 package com.example.composecharactersbase
 
+import CharacterViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +38,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 
 @Preview
 @Composable
@@ -46,45 +52,33 @@ fun CharacterApp() {
 }
 
 @Composable
-fun CharacterListScreen() {
-    // Lista de personagens mockados (dados fictícios para teste).
-    val characters = listOf(
-        CharacterMock(
-            name = "Rick Sanchez",
-            status = "Alive",
-            species = "Human",
-            imageUrl = "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
-        ),
-        CharacterMock(
-            name = "Morty Smith",
-            status = "Alive",
-            species = "Human",
-            imageUrl = "https://rickandmortyapi.com/api/character/avatar/2.jpeg"
-        ),
-        CharacterMock(
-            name = "Summer Smith",
-            status = "Alive",
-            species = "Human",
-            imageUrl = "https://rickandmortyapi.com/api/character/avatar/3.jpeg"
-        )
-    )
+fun CharacterListScreen(viewModel: CharacterViewModel = viewModel()) {
+    LaunchedEffect(Unit) {
+        viewModel.getCharacters()
+    }
 
-    // LazyColumn é uma lista otimizada para exibir grandes quantidades de dados.
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize() // Preenche todo o espaço disponível.
-            .padding(16.dp), // Adiciona um espaçamento interno de 16dp.
-        verticalArrangement = Arrangement.spacedBy(12.dp) // Espaçamento entre os itens da lista.
-    ) {
-        // Para cada personagem na lista, cria um item na LazyColumn.
-        items(characters) { character ->
-            CharacterCard(character) // Exibe o cartão do personagem.
+    val characters = viewModel.characters
+    val error = viewModel.errorMessage
+
+    if (error != null) {
+        Text("Erro ao carregar: $error", color = Color.Red)
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(characters) { character ->
+                CharacterCard(character)
+            }
         }
     }
 }
 
+
 @Composable
-fun CharacterCard(character: CharacterMock) {
+fun CharacterCard(character: CharacterModel) {
     // Estado que controla se o personagem é favorito ou não.
     var isFavorite by remember { mutableStateOf(false) }
 
@@ -105,7 +99,7 @@ fun CharacterCard(character: CharacterMock) {
         ) {
             // Exibe a imagem do personagem.
             Image(
-                painter = rememberAsyncImagePainter(model = character.imageUrl), // Carrega a imagem da URL.
+                painter = rememberAsyncImagePainter(model = character.image), // Carrega a imagem da URL.
                 contentDescription = "Character image", // Descrição da imagem para acessibilidade.
                 modifier = Modifier
                     .size(100.dp) // Define o tamanho da imagem.
@@ -127,7 +121,7 @@ fun CharacterCard(character: CharacterMock) {
                 // Exibe o status do personagem.
                 Text(text = "Status: ${character.status}")
                 // Exibe a espécie do personagem.
-                Text(text = "Species: ${character.species}")
+                Text(text = "Species: ${character.specie}")
             }
 
             // Botão para marcar/desmarcar o personagem como favorito.
