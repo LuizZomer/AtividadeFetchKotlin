@@ -39,17 +39,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.composecharactersbase.helpers.PrefsManager
-
 
 @Preview
 @Composable
 fun CharacterApp() {
-    // Função principal que inicia a tela do aplicativo.
-    // Aqui chamamos a tela que lista os personagens.
     CharacterListScreen()
 }
 
@@ -84,12 +79,11 @@ fun CharacterCard(character: CharacterModel) {
     val context = LocalContext.current
     var isFavorite by remember { mutableStateOf(PrefsManager.isFavorite(context, character.id)) }
 
-    // Card é um componente que cria um contêiner com elevação e bordas arredondadas.
     Card(
         modifier = Modifier
-            .fillMaxWidth() // Preenche toda a largura disponível.
-            .height(140.dp), // Define a altura do cartão.
-        shape = RoundedCornerShape(16.dp), // Define bordas arredondadas.
+            .fillMaxWidth()
+            .height(140.dp),
+        shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) // Define a elevação do cartão.
     ) {
         // Row organiza os elementos horizontalmente.
@@ -101,7 +95,7 @@ fun CharacterCard(character: CharacterModel) {
         ) {
             // Exibe a imagem do personagem.
             Image(
-                painter = rememberAsyncImagePainter(model = character.image), // Carrega a imagem da URL.
+                painter = rememberAsyncImagePainter(character.image), // Carrega a imagem da URL.
                 contentDescription = "Character image", // Descrição da imagem para acessibilidade.
                 modifier = Modifier
                     .size(100.dp) // Define o tamanho da imagem.
@@ -146,11 +140,3 @@ fun CharacterCard(character: CharacterModel) {
         }
     }
 }
-
-// Classe de dados que representa um personagem.
-data class CharacterMock(
-    val name: String, // Nome do personagem.
-    val status: String, // Status do personagem (ex.: Vivo, Morto).
-    val species: String, // Espécie do personagem (ex.: Humano, Alien).
-    val imageUrl: String // URL da imagem do personagem.
-)
