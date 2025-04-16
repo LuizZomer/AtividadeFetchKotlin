@@ -35,12 +35,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.composecharactersbase.helpers.PrefsManager
 
 
 @Preview
@@ -79,8 +81,8 @@ fun CharacterListScreen(viewModel: CharacterViewModel = viewModel()) {
 
 @Composable
 fun CharacterCard(character: CharacterModel) {
-    // Estado que controla se o personagem é favorito ou não.
-    var isFavorite by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var isFavorite by remember { mutableStateOf(PrefsManager.isFavorite(context, character.id)) }
 
     // Card é um componente que cria um contêiner com elevação e bordas arredondadas.
     Card(
@@ -127,9 +129,12 @@ fun CharacterCard(character: CharacterModel) {
             // Botão para marcar/desmarcar o personagem como favorito.
             IconButton(
                 onClick = {
-                    isFavorite = !isFavorite // Alterna o estado de favorito.
-                    // TODO: Salvar ou remover dos favoritos usando SharedPreferences.
-                }
+                    isFavorite = !isFavorite
+                    if (isFavorite) {
+                        PrefsManager.saveFavorite(context, character.id)
+                    } else {
+                        PrefsManager.removeFavorite(context, character.id)
+                    }                }
             ) {
                 // Ícone que muda dependendo do estado de favorito.
                 Icon(
